@@ -9,6 +9,12 @@
 	<img src="https://user-images.githubusercontent.com/20282795/71583992-a2acda00-2b4b-11ea-8f72-1d0068b020ff.gif" width=900>
 </div>
 
+## Install
+
+```vim
+Plug 'voldikss/vim-codelf'
+```
+
 ## Keymap
 
 ```vim
