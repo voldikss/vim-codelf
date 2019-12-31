@@ -1,5 +1,7 @@
 # vim-codelf
 
+[![Build Status](https://travis-ci.org/voldikss/vim-codelf.svg?branch=master)](https://travis-ci.org/voldikss/vim-codelf)
+
 (Neo)Vim plugin for searching useful variable names from [CODELF](https://github.com/unbug/codelf)
 
 <div align="center">

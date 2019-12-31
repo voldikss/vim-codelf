@@ -21,18 +21,18 @@ if !exists('s:python_executable')
 endif
 
 if has('nvim')
-  function! s:on_stdout_nvim(jobid, data, event)
+  function! s:on_stdout_nvim(jobid, data, event) abort
     call s:callback(a:data)
   endfunction
 
-  function! s:on_exit_nvim(jobid, code, event)
+  function! s:on_exit_nvim(jobid, code, event) abort
   endfunction
 else
-  function! s:on_stdout_vim(event, ch, msg)
-    call s:callback(a:data)
+  function! s:on_stdout_vim(event, ch, msg) abort
+    call s:callback(a:msg)
   endfunction
 
-  function! s:on_exit_vim(ch, code)
+  function! s:on_exit_vim(ch, code) abort
   endfunction
 endif
 
@@ -45,7 +45,7 @@ function! s:callback(data) abort
 
   try
     let candidates = eval(message)
-    if message == '' || type(candidates) != 3
+    if message ==# '' || type(candidates) != 3
       call codelf#util#show_msg('No queries', 'info')
       return
     endif
@@ -62,7 +62,7 @@ endfunction
 
 ""
 " Display the candidates in popup menu or inputlist
-function s:display(candidates) abort
+function! s:display(candidates) abort
   " If user moved the cursor, codelf displaying will be cancelled
   if exists('s:cursor_pos') && getpos('.') != s:cursor_pos
     call codelf#util#show_msg('Codelf cancelled since the cursor was moved', 'warning')
@@ -70,9 +70,9 @@ function s:display(candidates) abort
   endif
   unlet s:cursor_pos
 
-  if g:codelf_enable_popup_menu == v:true && mode() == 'i'
+  if g:codelf_enable_popup_menu == v:true && mode() ==# 'i'
     let pos = col('.')
-    normal diw
+    normal! diw
     call complete(pos, a:candidates)
   else
     let candidates = ['Choose from:']
