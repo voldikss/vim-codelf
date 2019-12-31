@@ -163,7 +163,7 @@ class Codelf(Base):
         sys.stdout.write(str(result))
 
     def is_chinese(self, s):
-        return all([u'\u4e00' <= ch <= u'\u9fff' for ch in s])
+        return any([u'\u4e00' <= ch <= u'\u9fff' for ch in s])
 
 
 if __name__ == '__main__':
