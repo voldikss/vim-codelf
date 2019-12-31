@@ -8,6 +8,8 @@
 
 import codecs
 import json
+import time
+import random
 import re
 import sys
 if sys.version_info[0] < 3:
@@ -37,67 +39,145 @@ else:
 
 
 CODELF_API = 'https://searchcode.com/api/codesearch_I/?callback=searchcodeRequestVariableCallback&p=0&per_page=42&q='
-YOUDAO_API = 'https://fanyi.youdao.com/openapi.do?callback=youdaoFanyiRequestCallback&keyfrom=Codelf&key=2023743559&type=data&doctype=jsonp&version=1.1&q='
 FILTER_WORDS = ['at', 'are', 'am', 'the', 'of', 'at', 'a', 'an', 'is', 'not', 'no', 'a', 'b', 'c', 'd', 'e',
                 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 
 
-def search(words):
-    if is_chinese(words):
-        words = translate(words)
-    url = CODELF_API + url_quote(words)
-    r_json = http_request(url)
-    if r_json:
-        search_callback(r_json, words)
+class Base:
+    def http_request(self, url, data=None, headers=None):
+        if data:
+            req = Request(url, data, headers)
+        else:
+            req = Request(url, headers)
+        try:
+            res = urlopen(req, timeout=5)
+        except (URLError, HTTPError):
+            return None
+        return res.read().decode('utf-8')
 
 
-def search_callback(r_json, words):
-    res = json.loads(r_json)
-    result = []
-    for item in res['results']:
-        for lnum in item['lines']:
-            line = item['lines'][lnum]
-            line = re.sub(r'[^a-zA-Z_\-]+', ' ', line).strip()
-            for target in words.split():
-                for word in re.split(r'\s+', line):
-                    if target.lower() in word.lower() and word not in result:
-                        result.append(word)
-    sys.stdout.write(str(result))
+class YoudaoTranslator(Base):
+
+    def __init__(self):
+        self.url = 'https://fanyi.youdao.com/translate_o?smartresult=dict&smartresult=rule'
+        self.D = "97_3(jkMYg@T[KZQmqjTK"
+
+    def get_md5(self, value):
+        import hashlib
+        m = hashlib.md5()
+        m.update(value.encode('utf-8'))
+        return m.hexdigest()
+
+    def sign(self, text, salt):
+        s = "fanyideskweb" + text + salt + self.D
+        return self.get_md5(s)
+
+    def callback(self, r_json):
+        paraphrase = self.get_paraphrase(r_json)
+        if paraphrase:
+            translation = paraphrase
+        else:
+            explain = self.get_explain(r_json)
+            if len(explain) == 0:
+                return None
+            translation = explain[0]
+        return ''.join(filter(lambda x: x.lower()
+                              not in FILTER_WORDS, translation.split()))
+
+    def translate(self, text):
+        self.text = text
+        salt = str(int(time.time() * 1000) + random.randint(0, 10))
+        sign = self.sign(text, salt)
+        header = {
+            'Cookie': 'OUTFOX_SEARCH_USER_ID=-2022895048@10.168.8.76;',
+            'Referer': 'http://fanyi.youdao.com/',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; rv:51.0) Gecko/20100101 Firefox/51.0',
+        }
+        data = {
+            'i': text,
+            'from': 'zh',
+            'to': 'en',
+            'smartresult': 'dict',
+            'client': 'fanyideskweb',
+            'salt': salt,
+            'sign': sign,
+            'doctype': 'json',
+            'version': '2.1',
+            'keyfrom': 'fanyi.web',
+            'action': 'FY_BY_CL1CKBUTTON',
+            'typoResult': 'true'
+        }
+
+        data = urlencode(data).encode('utf-8')
+        res = self.http_request(self.url, data, header)
+        r_json = json.loads(res)
+        return self.callback(r_json)
+
+    def get_paraphrase(self, obj):
+        translation = ''
+        t = obj.get('translateResult')
+        if t:
+            for n in t:
+                part = []
+                for m in n:
+                    x = m.get('tgt')
+                    if x:
+                        part.append(x)
+                if part:
+                    translation += ', '.join(part)
+        return translation
+
+    def get_explain(self, obj):
+        explain = []
+        if 'smartResult' in obj:
+            smarts = obj['smartResult']['entries']
+            for entry in smarts:
+                if entry:
+                    entry = entry.replace('\r', '')
+                    entry = entry.replace('\n', '')
+                    explain.append(entry)
+        return explain
 
 
-def translate(zh_str):
-    url = YOUDAO_API + url_quote(zh_str)
-    res = http_request(url)
-    if res:
-        json_str = res[27:-2]
-        r_json = json.loads(json_str)
-        return translate_callback(r_json)
+class Codelf(Base):
+    def search(self, words):
+        if self.is_chinese(words):
+            translator = YoudaoTranslator()
+            words = translator.translate(words)
+        url = CODELF_API + url_quote(words)
+        r_json = self.http_request(url)
+        if r_json:
+            self.callback(r_json, words)
 
+    def callback(self, r_json, words):
+        res = json.loads(r_json)
+        result = []
+        for item in res['results']:
+            for lnum in item['lines']:
+                line = item['lines'][lnum]
+                line = re.sub(r'[^a-zA-Z_\-]+', ' ', line).strip()
+                for target in words.split():
+                    for word in re.split(r'\s+', line):
+                        if target.lower() in word.lower() and word not in result:
+                            result.append(word)
+        sys.stdout.write(str(result))
 
-def translate_callback(r_json):
-    if 'translation' in r_json:
-        translation = r_json['translation'][0]
-    elif 'explain' in r_json:
-        translation = r_json['explain'][0]
-    else:
-        return ''
-    return ''.join(filter(lambda x: x.lower() not in FILTER_WORDS, translation.split()))
-
-
-def is_chinese(s):
-    return all([u'\u4e00' <= ch <= u'\u9fff' for ch in s])
-
-
-def http_request(url):
-    req = Request(url)
-    try:
-        res = urlopen(req, timeout=5)
-    except (URLError, HTTPError):
-        return None
-    return res.read().decode('utf-8')
+    def is_chinese(self, s):
+        return all([u'\u4e00' <= ch <= u'\u9fff' for ch in s])
 
 
 if __name__ == '__main__':
-    search(''.join(sys.argv[1:]))
-    # search('图片')
-    # translate('图片')
+    def test_codelf():
+        codelf = Codelf()
+        codelf.search('图片')
+
+    def test_youdao():
+        translator = YoudaoTranslator()
+        res = translator.translate('图片')
+        print(res)
+
+    # test_codelf()
+    # test_youdao()
+
+    codelf = Codelf()
+    codelf.search(''.join(sys.argv[1:]))
