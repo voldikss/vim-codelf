@@ -10,6 +10,7 @@ if exists('g:loaded_codelf')
   finish
 endif
 let g:loaded_codelf= 1
+let g:codelf_status = ''
 
 let g:codelf_enable_popup_menu = get(g:, 'codelf_enable_popup_menu', v:true)
 

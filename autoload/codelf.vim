@@ -37,6 +37,7 @@ else
 endif
 
 function! s:callback(data) abort
+  let g:codelf_status = ''
   if type(a:data) == 3
     let message = join(a:data, ' ')
   else
@@ -112,6 +113,7 @@ function! s:job_start(cmd) abort
 endfunction
 
 function! codelf#start(...) abort
+  let g:codelf_status = 'requesting codelf'
   let s:cursor_pos = getpos('.')
   if a:0 == 0
     let word = expand('<cword>')
