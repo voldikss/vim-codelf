@@ -1,6 +1,6 @@
 # vim-codelf
 
-[![Build Status](https://travis-ci.org/voldikss/vim-codelf.svg?branch=master)](https://travis-ci.org/voldikss/vim-codelf)
+![CI](https://github.com/voldikss/vim-codelf/workflows/CI/badge.svg)
 
 (Neo)Vim plugin for searching useful variable names from [CODELF](https://github.com/unbug/codelf)
 
