@@ -54,11 +54,7 @@ function! s:callback(data) abort
     return
   endtry
 
-  let matches = []
-  for item in candidates
-    call add(matches,item)
-  endfor
-  call s:display(matches)
+  call s:display(candidates)
 endfunction
 
 ""
