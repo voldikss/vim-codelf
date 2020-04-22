@@ -189,6 +189,8 @@ class Codelf(Base):
         r_json = self.http_request(url)
         if r_json:
             self.callback(r_json, word)
+        else:
+            sys.stdout.write(str([word]))
 
     def callback(self, r_json, word):
         res = json.loads(r_json)
