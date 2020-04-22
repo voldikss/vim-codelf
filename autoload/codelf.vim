@@ -116,9 +116,12 @@ function! codelf#start(...) abort
   else
     let word = a:1
   endif
-  let cmd = 'python3 ' . s:py_file . ' ' . word
   if g:codelf_enable_popup_menu == v:true
     startinsert
+  endif
+  let cmd = 'python3 ' . s:py_file . ' --text=' . shellescape(word)
+  if empty(g:codelf_proxy_url)
+    let cmd .= ' --proxy=' . g:codelf_proxy_url
   endif
   call s:job_start(cmd)
   return ''

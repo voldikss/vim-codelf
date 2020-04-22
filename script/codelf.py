@@ -7,8 +7,10 @@
 # ===========================================================================
 
 import codecs
+import argparse
 import json
 import time
+import socket
 import random
 import re
 import sys
@@ -89,9 +91,49 @@ class Base:
             req = Request(url, headers)
         try:
             res = urlopen(req, timeout=10)
-        except (URLError, HTTPError):
+        except (URLError, HTTPError, socket.timeout):
             return None
         return res.read().decode("utf-8")
+
+    def set_proxy(self, proxy_url=None):
+        try:
+            import socks
+        except ImportError:
+            sys.stderr.write("pySocks module should be installed\n")
+            return None
+
+        try:
+            import ssl
+
+            ssl._create_default_https_context = ssl._create_unverified_context
+        except Exception:
+            pass
+
+        self._proxy_url = proxy_url
+
+        proxy_types = {
+            "http": socks.PROXY_TYPE_HTTP,
+            "socks": socks.PROXY_TYPE_SOCKS4,
+            "socks4": socks.PROXY_TYPE_SOCKS4,
+            "socks5": socks.PROXY_TYPE_SOCKS5,
+        }
+
+        url_component = urlparse(proxy_url)
+
+        proxy_args = {
+            "proxy_type": proxy_types[url_component.scheme],
+            "addr": url_component.hostname,
+            "port": url_component.port,
+            "username": url_component.username,
+            "password": url_component.password,
+        }
+
+        socks.set_default_proxy(**proxy_args)
+        socket.socket = socks.socksocket
+
+    def test_request(self, test_url):
+        print("test url: %s" % test_url)
+        print(self.http_request(test_url))
 
 
 class YoudaoTranslator(Base):
@@ -209,7 +251,30 @@ class Codelf(Base):
         return any([u"\u4e00" <= ch <= u"\u9fff" for ch in s])
 
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--text", required=True)
+    parser.add_argument("--proxy", required=False)
+    args = parser.parse_args()
+
+    text = args.text.strip("'")
+    text = text.strip('"')
+    text = text.strip()
+    proxy = args.proxy
+
+    codelf = Codelf()
+    if proxy:
+        codelf.set_proxy(proxy)
+
+    codelf.search(text)
+
+
 if __name__ == "__main__":
+
+    def test_proxy():
+        t = Base()
+        t.set_proxy("http://localhost:8087")
+        t.test_request("https://www.google.com")
 
     def test_codelf():
         codelf = Codelf()
@@ -222,6 +287,4 @@ if __name__ == "__main__":
 
     # test_codelf()
     # test_youdao()
-
-    codelf = Codelf()
-    codelf.search("".join(sys.argv[1:]))
+    main()
