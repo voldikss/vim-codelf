@@ -32,6 +32,10 @@ nnoremap <silent> <F9> :call codelf#start()<CR>
 If set `v:true`, the available variable names will displayed in popup menu, which behaviors just like code completion.
 Otherwise, they will be displayed in cmdline, prompting the user to select one(like `:z=`) to replace the word under the cursor.
 
+#### `g:codelf_proxy_url`
+
+e.g. `let g:codelf_proxy_url=http://127.0.0.1:1081`
+
 ## Commands
 
 #### `:Codelf [word]`
