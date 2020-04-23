@@ -44,11 +44,11 @@ Query the `word` from [codelf](https://github.com/unbug/codelf), return the vari
 
 #### `:CodelfOpenBrowser [word]`
 
+Go to [CODELF](https://github.com/unbug/codelf) for the `word`. If no `word`, use the word under the cursor. [vim-browser-search](https://github.com/voldikss/vim-browser-search) supplies the same function.
+
 ## Statusline
 
 - `g:codelf_status`
-
-Open browser with querying the `word`. If no `word`, use the word under the cursor. My another plugin [vim-browser-search](https://github.com/voldikss/vim-browser-search) supplies the same function.
 
 ## Q&As
 
