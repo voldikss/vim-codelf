@@ -1,0 +1,109 @@
+*codelf.txt*  vim-codelf
+
+===============================================================================
+Contents ~
+
+ 1. Introduction                                          |codelf-introduction|
+ 2. Install                                                    |codelf-install|
+ 3. Keymap                                                      |codelf-keymap|
+ 4. Configuration                                        |codelf-configuration|
+   1. g:codelf_enable_popup_menu                   |g-codelf_enable_popup_menu|
+   2. g:codelf_proxy_url                                   |g-codelf_proxy_url|
+ 5. Commands                                                  |codelf-commands|
+   1. :Codelf [word]                                              |codelf-word|
+   2. :CodelfOpenBrowser [word]                        |codelfopenbrowser-word|
+ 6. Statusline                                              |codelf-statusline|
+   1. g:codelf_status                                         |g-codelf_status|
+ 7. Q&As                                                          |codelf-q-as|
+ 8. References                                              |codelf-references|
+
+===============================================================================
+                                                          *codelf-introduction*
+Introduction ~
+
+(Neo)Vim plugin for searching useful variable names from CODELF [1]
+
+Image: (see reference [2])Image: (see reference [3])
+
+===============================================================================
+                                                               *codelf-install*
+Install ~
+    >
+  Plug 'voldikss/vim-codelf'
+<
+===============================================================================
+                                                                *codelf-keymap*
+Keymap ~
+    >
+  " Example key mappings configuration
+  inoremap <silent> <F9> <C-R>=codelf#start()<CR>
+  nnoremap <silent> <F9> :call codelf#start()<CR>
+<
+===============================================================================
+                                                         *codelf-configuration*
+Configuration ~
+
+-------------------------------------------------------------------------------
+                                                   *g:codelf_enable_popup_menu*
+g:codelf_enable_popup_menu ~
+
+If set 'v:true', the available variable names will displayed in popup menu,
+which behaviors just like code completion. Otherwise, they will be displayed in
+cmdline, prompting the user to select one(like ':z=') to replace the word under
+the cursor.
+
+-------------------------------------------------------------------------------
+                                                           *g:codelf_proxy_url*
+g:codelf_proxy_url ~
+
+e.g. 'let g:codelf_proxy_url=http://127.0.0.1:1081'
+
+===============================================================================
+                                                              *codelf-commands*
+Commands ~
+
+-------------------------------------------------------------------------------
+                                                                  *Codelf*
+:Codelf [word] ~
+
+Query the 'word' from codelf [1], return the variable name.
+
+-------------------------------------------------------------------------------
+                                                       *CodelfOpenBrowser*
+:CodelfOpenBrowser [word] ~
+
+Go to CODELF [1] for the 'word'. If 'word' is not given, use the word under the cursor.
+vim-browser-search [4] supplies the same function.
+
+===============================================================================
+                                                            *codelf-statusline*
+Statusline ~
+
+-------------------------------------------------------------------------------
+                                                              *g-codelf_status*
+g:codelf_status ~
+
+===============================================================================
+                                                                  *codelf-q-as*
+Q&As ~
+
+- How to stop it from displaying after triggering a codelf query?
+
+If the cursor was moved to another place, the callback function will be
+disabled.
+
+- Will it frozen my Vim?
+
+If your (Neo)Vim has 'job' feature, this plugin won't stop your behavior.
+Otherwise, yes(and this plugin is not recommended in that case).
+
+===============================================================================
+                                                            *codelf-references*
+References ~
+
+[1] https://github.com/unbug/codelf
+[2] https://user-images.githubusercontent.com/20282795/71583991-a2acda00-2b4b-11ea-99aa-097762e92383.gif
+[3] https://user-images.githubusercontent.com/20282795/71583992-a2acda00-2b4b-11ea-8f72-1d0068b020ff.gif
+[4] https://github.com/voldikss/vim-browser-search
+
+vim: ft=help
