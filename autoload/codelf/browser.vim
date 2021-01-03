@@ -27,7 +27,7 @@ function! s:open_url(url) abort
 endfunction
 
 function! codelf#browser#open(...) abort
-  let codelf_api = 'https://unbug.github.io/codelf'
+  let codelf_api = 'https://unbug.github.io/codelf#'
   if a:0 == 0
     let word = expand('<cword>')
   else
